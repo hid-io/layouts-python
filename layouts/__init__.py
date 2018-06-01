@@ -5,12 +5,6 @@ Python API for HID-IO HID Layouts Repository
 - Handles JSON merging
 - Can query all possible layouts
 
-TODO
-
-- pip package
-- Initial local cache
-- Retrieving cache
-
 
 Call using python virtual env + python -m layouts
 
@@ -38,7 +32,7 @@ from github import Github
 
 ## Variables
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 log = logging.getLogger(__name__)
 
@@ -47,9 +41,9 @@ log = logging.getLogger(__name__)
 
 class Layouts:
     '''
-    Retrieves various HID layouts using either an internal (or external) cache.
+    Retrieves various HID layouts using an external cache.
 
-    If there is no internal cache defined, one is downloaded from GitHub.
+    If no cache is found, one is downloaded from GitHub.
     By default, when retrieving a cache from GitHub, the latest version is used.
     '''
     def __init__(self,
@@ -60,9 +54,6 @@ class Layouts:
         token=None
     ):
         '''
-        TODO
-        - Local cache
-
         @param github_path: Location of the git repo on GitHub (e.g. hid-io/layouts)
         @param version: git reference for the version to download (e.g. master)
         @param force_refresh: If True, always check GitHub for the latest cache
@@ -328,6 +319,22 @@ class Layout:
         '''
         return self.json_data_orig
 
+    def locale(self):
+        '''
+        Do a lookup for the locale code that is set for this layout.
+
+        NOTE: USB HID specifies only 35 different locales. If your layout does not fit, it should be set to Undefined/0
+
+        @return: Tuple (<USB HID locale code>, <name>)
+        '''
+        name = self.json_data['hid_locale']
+
+        # Set to Undefined/0 if not set
+        if name is None:
+            name = "Undefined"
+
+        return (int(self.json_data['from_hid_locale'][name]), name)
+
     def __repr__(self):
         '''
         String representation of Layout
@@ -342,7 +349,7 @@ class Layout:
         '''
         return self.json_data['parent']
 
-    def compose(self, text):
+    def compose(self, text, minimal_clears=False):
         '''
         Returns the sequence of combinations necessary to compose given text.
 
@@ -351,7 +358,10 @@ class Layout:
         Iterate over the string, converting each character into a key sequence.
         Between each character, an empty combo is inserted to handle duplicate strings (and USB HID codes between characters)
 
-        TODO (HaaTa): Add intelligence to not include an empty combo when it is certain there won't be conflicts.
+        @param text: Input UTF-8 string
+        @param minimal_clears: Set to True to minimize the number of code clears. False (default) includes a clear after every character.
+
+        @returns: Sequence of combinations needed to generate the given text string
         '''
         sequence = []
 
@@ -361,10 +371,23 @@ class Layout:
                 raise ComposeException("'{}' is not defined as a composition in the layout '{}'".format(char, self.name))
 
             # Lookup the sequence to handle this character
-            sequence.extend(self.json_data['composition'][char])
+            lookup = self.json_data['composition'][char]
+
+            # If using minimal clears, check to see if we need to re-use any codes
+            # Only need to check the most recent addition with the first combo
+            if sequence and set(tuple(lookup[0])) & set(tuple(sequence[-1])):
+                sequence.extend([[]])
+
+            # Add to overall sequence
+            sequence.extend(lookup)
 
             # Add empty combo for sequence splitting
-            # TODO (HaaTa): Add intelligence to know when to not add an empty combo
+            if not minimal_clears:
+                # Blindly add a clear combo between characters
+                sequence.extend([[]])
+
+        # When using minimal clears, we still need to add a final clear
+        if minimal_clears:
             sequence.extend([[]])
 
         return sequence

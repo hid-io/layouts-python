@@ -1,6 +1,7 @@
 # HID-IO layouts Python API
 
 This is the Python API for the HID-IO [layouts](https://github.com/hid-io/layouts) repository.
+By default, the API will download the latest version of the layouts git repository to use that as a cache.
 
 The purpose of this API is to acquire and merge the JSON HID layouts.
 With some additional helpers to deal with string composition.
@@ -40,6 +41,7 @@ layout = mgr.get_layout('default')
 
 print(layout.name()) # Name of merged layout
 print(layout.json()) # Fully merged JSON dict
+print(layout.locale()) # Tuple (<USB HID locale code>, <name>)
 ```
 
 
@@ -53,5 +55,27 @@ layout = mgr.get_layout('default')
 
 input_str = "Hello World!"
 print(layout.compose(input_str))
+
+# Only use code clears when necessary (blank USB packet)
+print(layout.compose(input_str, minimal_clears=True))
+```
+
+
+### Codes for C-Style Defines
+
+```python
+import layouts
+import layouts.emitter
+
+mgr = layouts.Layouts()
+layout = mgr.get_layout('default')
+
+# Returns a list of list of tuples
+# Each type of code has a pre-defined (configurable) prefix
+# [<keyboard codes>, <led codes>, <system control codes>, <consumer codes>]
+# (<name>, <code>)
+# Useful for:
+# #define KEY_A 0x04
+print(layouts.emitter.basic_c_defines(layout))
 ```
 

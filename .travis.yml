@@ -32,10 +32,11 @@ install:
   - uname -a
 
   # Prepare pipenv
-  - pip install pipenv
+  - pip install pipenv flit
   - pipenv install -d
 
 # Run test script(s)
 script:
   - pipenv run pytest
+  - pipenv run flit build
 
