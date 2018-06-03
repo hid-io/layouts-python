@@ -23,10 +23,22 @@ Some basic usage examples.
 
 ### List Layouts
 
+**GitHub Cache**
+
 ```python
 import layouts
 
 mgr = layouts.Layouts()
+print(mgr.list_layouts()
+```
+
+**Local Cache**
+
+```python
+import layouts
+
+layout_dir = "/tmp/mylayouts/layouts"
+mgr = layouts.Layouts(layout_path=layout_dir)
 print(mgr.list_layouts()
 ```
 

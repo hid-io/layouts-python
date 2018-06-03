@@ -32,7 +32,7 @@ from github import Github
 
 ## Variables
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 log = logging.getLogger(__name__)
 
@@ -51,7 +51,8 @@ class Layouts:
         version='master',
         force_refresh=False,
         cache_dir=tempfile.gettempdir(),
-        token=None
+        token=None,
+        layout_path=None,
     ):
         '''
         @param github_path: Location of the git repo on GitHub (e.g. hid-io/layouts)
@@ -59,24 +60,29 @@ class Layouts:
         @param force_refresh: If True, always check GitHub for the latest cache
         @param cache_dir: Directory to operate on external cache from
         @param token: GitHub access token, defaults to None
+        @param layout_path: Location to look for layouts (e.g. local copy). Disables GitHub cache when not None.
         '''
-        # Check to see if there is a cache available already
-        match = "*{}*".format(github_path.replace('/', '-'))
-        matches = sorted(glob.glob(os.path.join(cache_dir, match)))
+        self.layout_path = layout_path
 
-        # If force refresh, clear cache, and return no matches
-        if force_refresh:
-            for mat in matches:
-                shutil.rmtree(mat)
-            matches = []
-
-        # No cache, retrieve from GitHub
-        if not matches:
-            self.retrieve_github_cache(github_path, version, cache_dir, token)
+        # Only check GitHub cache if layout_path is not set
+        if self.layout_path is None:
+            # Check to see if there is a cache available already
+            match = "*{}*".format(github_path.replace('/', '-'))
             matches = sorted(glob.glob(os.path.join(cache_dir, match)))
 
-        # Select the newest cache
-        self.layout_path = matches[-1]
+            # If force refresh, clear cache, and return no matches
+            if force_refresh:
+                for mat in matches:
+                    shutil.rmtree(mat)
+                matches = []
+
+            # No cache, retrieve from GitHub
+            if not matches:
+                self.retrieve_github_cache(github_path, version, cache_dir, token)
+                matches = sorted(glob.glob(os.path.join(cache_dir, match)))
+
+            # Select the newest cache
+            self.layout_path = matches[-1]
 
         # Scan for all JSON files
         self.json_file_paths = sorted(glob.glob(os.path.join(self.layout_path, "**/*.json")))
