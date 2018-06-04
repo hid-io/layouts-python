@@ -17,6 +17,7 @@ Call using python virtual env + python -m layouts
 ## Imports
 
 import argparse
+import copy
 import glob
 import json
 import logging
@@ -208,7 +209,7 @@ class Layouts:
             # Just add, if the key doesn't exist yet
             # Or if set to None/Null
             if key not in merge_to.keys() or merge_to[key] is None:
-                merge_to[key] = value
+                merge_to[key] = copy.copy(value)
                 continue
 
             # Overwrite case, check for types
@@ -222,7 +223,7 @@ class Layouts:
                 continue
 
             # Otherwise just overwrite
-            merge_to[key] = value
+            merge_to[key] = copy.copy(value)
 
     def squash_layouts(self, layouts):
         '''

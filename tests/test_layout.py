@@ -47,9 +47,15 @@ def test_usb_hid_keyboard_code_squash(layout_mgr):
     '''
     Test to make sure HID keyboard codes are squashed as expected
     '''
-    #layout_name = 'default'
-    #layout = layout_mgr.get_layout(layout_name)
-    # TODO - Need example to squash
+    layout_default = layout_mgr.get_layout('default')
+    assert int(layout_default.json()['from_hid_keyboard']['Z'], 0) == 0x1D
+
+    layout_squash = layout_mgr.get_layout('de_DE')
+    assert int(layout_default.json()['from_hid_keyboard']['Z'], 0) == 0x1D # Make sure datastructures are still ok
+    assert int(layout_squash.json()['from_hid_keyboard']['Z'], 0) == 0x1C
+
+    # de_DE remaps Z to the Y position (on an ANSI keyboard), make sure the layouts don't match
+    assert layout_default.json()['from_hid_keyboard']['Z'] != layout_squash.json()['from_hid_keyboard']['Z']
 
 def test_string_compose(default_layout):
     '''
