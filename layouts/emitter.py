@@ -14,6 +14,7 @@ def basic_c_defines(
     led_prefix="LED_",
     sysctrl_prefix="SYS_",
     cons_prefix="CONS_",
+    code_suffix=True,
     all_caps=True,
     space_char="_"
 ):
@@ -25,6 +26,7 @@ def basic_c_defines(
     @led_prefix: Prefix used for to_hid_led
     @sysctrl_prefix: Prefix used for to_hid_sysctrl
     @cons_prefix: Prefix used for to_hid_consumer
+    @code_suffix: Append _<usb code> to each name
     @all_caps: Set to true if labels should be converted to all caps
     @space_char: Character to replace space with
 
@@ -36,6 +38,8 @@ def basic_c_defines(
         new_name = "{}{}".format(keyboard_prefix, name.replace(' ', space_char))
         if all_caps:
             new_name = new_name.upper()
+        if code_suffix:
+            new_name = "{}_{}".format(new_name, int(code, 0))
         define = (new_name, code)
         keyboard_defines.append(define)
 
@@ -45,6 +49,8 @@ def basic_c_defines(
         new_name = "{}{}".format(led_prefix, name.replace(' ', space_char))
         if all_caps:
             new_name = new_name.upper()
+        if code_suffix:
+            new_name = "{}_{}".format(new_name, int(code, 0))
         define = (new_name, code)
         led_defines.append(define)
 
@@ -54,6 +60,8 @@ def basic_c_defines(
         new_name = "{}{}".format(sysctrl_prefix, name.replace(' ', space_char))
         if all_caps:
             new_name = new_name.upper()
+        if code_suffix:
+            new_name = "{}_{}".format(new_name, int(code, 0))
         define = (new_name, code)
         sysctrl_defines.append(define)
 
@@ -63,6 +71,8 @@ def basic_c_defines(
         new_name = "{}{}".format(cons_prefix, name.replace(' ', space_char))
         if all_caps:
             new_name = new_name.upper()
+        if code_suffix:
+            new_name = "{}_{}".format(new_name, int(code, 0))
         define = (new_name, code)
         cons_defines.append(define)
 

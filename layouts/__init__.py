@@ -33,7 +33,7 @@ from github import Github
 
 ## Variables
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 log = logging.getLogger(__name__)
 
@@ -283,6 +283,13 @@ class MergeException(Exception):
     pass
 
 
+class InvalidDictionaryException(Exception):
+    '''
+    Thrown when using the dict method and requesting a JSON field that is not a dictionary.
+    '''
+    pass
+
+
 class Layout:
     '''
     Container class for each JSON layout dictionary.
@@ -309,6 +316,26 @@ class Layout:
         @return: Attributed name for the layout
         '''
         return self.layout_name
+
+    def dict(self, name, key_caps=False, value_caps=False):
+        '''
+        Returns a JSON dict
+
+        @key_caps: Converts all dictionary keys to uppercase
+        @value_caps: Converts all dictionary values to uppercase
+
+        @return: JSON item (may be a variable, list or dictionary)
+        '''
+        # Invalid Dictionary
+        if not isinstance(self.json_data[name], dict):
+            raise InvalidDictionaryException
+
+        # Convert key and/or values of dictionary to uppercase
+        output = {}
+        for key, value in self.json_data[name].items():
+            output[key.upper() if key_caps else key] = value.upper() if value_caps else value
+
+        return output
 
     def json(self):
         '''
@@ -356,7 +383,7 @@ class Layout:
         '''
         return self.json_data['parent']
 
-    def compose(self, text, minimal_clears=False):
+    def compose(self, text, minimal_clears=False, no_clears=False):
         '''
         Returns the sequence of combinations necessary to compose given text.
 
@@ -367,10 +394,12 @@ class Layout:
 
         @param text: Input UTF-8 string
         @param minimal_clears: Set to True to minimize the number of code clears. False (default) includes a clear after every character.
+        @param no_clears: Set to True to not add any code clears (useful for input sequences). False (default) to include code clears.
 
         @returns: Sequence of combinations needed to generate the given text string
         '''
         sequence = []
+        clear = self.json_data['to_hid_keyboard']['0x00'] # No Event
 
         for char in text:
             # Make sure the composition element is available
@@ -382,20 +411,20 @@ class Layout:
 
             # If using minimal clears, check to see if we need to re-use any codes
             # Only need to check the most recent addition with the first combo
-            if sequence and set(tuple(lookup[0])) & set(tuple(sequence[-1])):
-                sequence.extend([[]])
+            if sequence and set(tuple(lookup[0])) & set(tuple(sequence[-1])) and not no_clears:
+                sequence.extend([[clear]])
 
             # Add to overall sequence
             sequence.extend(lookup)
 
             # Add empty combo for sequence splitting
-            if not minimal_clears:
+            if not minimal_clears and not no_clears:
                 # Blindly add a clear combo between characters
-                sequence.extend([[]])
+                sequence.extend([[clear]])
 
         # When using minimal clears, we still need to add a final clear
-        if minimal_clears:
-            sequence.extend([[]])
+        if minimal_clears and not no_clears:
+            sequence.extend([[clear]])
 
         return sequence
 

@@ -66,18 +66,18 @@ def test_string_compose(default_layout):
 
     # Empty combos are used to clear key-state
     compare = [
-        ["Shift", "H"], [],
-        ["E"], [],
-        ["L"], [],
-        ["L"], [],
-        ["O"], [],
-        ["Space"], [],
-        ["Shift", "W"], [],
-        ["O"], [],
-        ["R"], [],
-        ["L"], [],
-        ["D"], [],
-        ["Shift", "1"], [],
+        ["Shift", "H"], ["No Event"],
+        ["E"], ["No Event"],
+        ["L"], ["No Event"],
+        ["L"], ["No Event"],
+        ["O"], ["No Event"],
+        ["Space"], ["No Event"],
+        ["Shift", "W"], ["No Event"],
+        ["O"], ["No Event"],
+        ["R"], ["No Event"],
+        ["L"], ["No Event"],
+        ["D"], ["No Event"],
+        ["Shift", "1"], ["No Event"],
     ]
 
     # Convert list of list to a list of tuples
@@ -104,7 +104,7 @@ def test_string_compose_minimal(default_layout):
     compare = [
         ["Shift", "H"],
         ["E"],
-        ["L"], [],
+        ["L"], ["No Event"],
         ["L"],
         ["O"],
         ["Space"],
@@ -113,7 +113,7 @@ def test_string_compose_minimal(default_layout):
         ["R"],
         ["L"],
         ["D"],
-        ["Shift", "1"], [],
+        ["Shift", "1"], ["No Event"],
     ]
 
     # Convert list of list to a list of tuples
