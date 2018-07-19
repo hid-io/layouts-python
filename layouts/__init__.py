@@ -33,7 +33,7 @@ from github import Github
 
 ## Variables
 
-__version__ = '0.4'
+__version__ = '0.4.1'
 
 log = logging.getLogger(__name__)
 

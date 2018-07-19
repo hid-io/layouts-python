@@ -6,7 +6,8 @@ name = "pypi"
 [packages]
 pytest = "*"
 requests = "*"
-pygithub = "*"
+pygithub = "==1.39"
+pytest-xdist = "*"
 
 [dev-packages]
 
