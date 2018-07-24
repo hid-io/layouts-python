@@ -1,15 +1,18 @@
-# layouts tests
+'''
+Test various emitter configurations
+'''
+
+### Imports ###
 
 import layouts
 import layouts.emitter
 import pytest
 
-@pytest.fixture
-def layout_mgr():
-    '''
-    Layout manager setup
-    '''
-    return layouts.Layouts()
+from tests.layoutstest import layout_mgr
+
+
+
+### Functions ###
 
 def test_c_defines(layout_mgr):
     '''

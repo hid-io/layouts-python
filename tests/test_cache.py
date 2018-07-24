@@ -1,16 +1,24 @@
-# layouts cache download tests
+'''
+layouts cache download tests
+'''
+
+### Imports ###
 
 import os
 import tarfile
-import tempfile
 
 import layouts
 import pytest
 import requests
 
 from github import Github
+from tests.layoutstest import cache_dir
 
-def test_local_cache():
+
+
+### Functions ###
+
+def test_local_cache(cache_dir):
     '''
     Test local cache check
 
@@ -18,8 +26,7 @@ def test_local_cache():
     '''
     # Prepare layout cache
     github_path = 'hid-io/layouts'
-    tmp_dir = os.path.join(tempfile.gettempdir(), "layouts-python-test")
-    os.makedirs(tmp_dir, exist_ok=True)
+    tmp_dir = cache_dir
     version = 'master'
 
     # Check for environment variable Github token
@@ -57,10 +64,10 @@ def test_local_cache():
     mgr = layouts.Layouts(layout_path=dirpath)
     assert mgr.list_layouts()
 
-def test_github_cache():
+def test_github_cache(cache_dir):
     '''
     Test GitHub cache
     '''
-    mgr = layouts.Layouts(force_refresh=True)
+    mgr = layouts.Layouts(force_refresh=True, cache_dir=cache_dir)
     assert mgr.list_layouts()
 

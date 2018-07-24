@@ -1,14 +1,17 @@
-# layouts tests
+'''
+Test various layout configurations
+'''
+
+### Imports ###
 
 import layouts
 import pytest
 
-@pytest.fixture
-def layout_mgr():
-    '''
-    Layout manager setup
-    '''
-    return layouts.Layouts()
+from tests.layoutstest import layout_mgr
+
+
+
+### Functions ###
 
 @pytest.fixture
 def default_layout(layout_mgr):
