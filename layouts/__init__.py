@@ -28,7 +28,7 @@ import tempfile
 
 import requests
 
-from github import Github
+from github import Github, GithubException
 
 
 ## Variables
@@ -113,18 +113,24 @@ class Layouts:
         token = os.environ.get('GITHUB_APIKEY', None)
 
         # Retrieve repo information
-        gh = Github(token)
-        repo = gh.get_repo(github_path)
-        commit = repo.get_commit(version)
-        commits = repo.get_commits()
-        total_commits = 0
-        commit_number = 0
-        for cmt in commits:
-            if commit == cmt:
-                commit_number = total_commits
-            total_commits += 1
-        commit_number = total_commits - commit_number
-        tar_url = repo.get_archive_link('tarball', commit.sha)
+        try:
+            gh = Github(token)
+            repo = gh.get_repo(github_path)
+            commit = repo.get_commit(version)
+            commits = repo.get_commits()
+            total_commits = 0
+            commit_number = 0
+            for cmt in commits:
+                if commit == cmt:
+                    commit_number = total_commits
+                total_commits += 1
+            commit_number = total_commits - commit_number
+            tar_url = repo.get_archive_link('tarball', commit.sha)
+        except GithubException.RateLimitExceededException:
+            if token is None:
+                log.warning("GITHUB_APIKEY is not set!")
+            raise
+
         # GitHub only uses the first 7 characters of the sha in the download
         dirname_orig = "{}-{}".format(github_path.replace('/', '-'), commit.sha[:7])
         dirname_orig_path = os.path.join(cache_dir, dirname_orig)
