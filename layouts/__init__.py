@@ -33,7 +33,7 @@ from github import Github, GithubException
 
 ## Variables
 
-__version__ = '0.4.4'
+__version__ = '0.4.5'
 
 log = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class Layouts:
         # Load each of the JSON files into memory
         self.json_files = {}
         for path in self.json_file_paths:
-            with open(path) as json_file:
+            with open(path, encoding='utf8') as json_file:
                 self.json_files[path] = json.load(json_file)
 
         # Query names for all of the layouts
