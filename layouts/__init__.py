@@ -33,7 +33,7 @@ from github import Github, GithubException
 
 ## Variables
 
-__version__ = '0.4.3'
+__version__ = '0.4.4'
 
 log = logging.getLogger(__name__)
 
@@ -156,6 +156,7 @@ class Layouts:
             tar = tarfile.open(filepath)
             tar.extractall(cache_dir)
             os.rename(dirname_orig_path, dirname_path)
+            tar.close()
 
             # Remove tar.gz
             os.remove(filepath)
