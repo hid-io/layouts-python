@@ -33,7 +33,7 @@ from github import Github, GithubException
 
 ## Variables
 
-__version__ = '0.4.5'
+__version__ = '0.4.6'
 
 log = logging.getLogger(__name__)
 
@@ -87,6 +87,14 @@ class Layouts:
 
         # Scan for all JSON files
         self.json_file_paths = sorted(glob.glob(os.path.join(self.layout_path, "**/*.json")))
+
+        # If no json files were found this is likely a corrupted path
+        # Remove the path and ask to try again
+        if len(self.json_file_paths) == 0:
+            log.error("No JSON files were found, removing the given layouts directory: %s", self.layout_path)
+            log.error("Please re-run.")
+            shutil.rmtree(self.layout_path)
+            raise CorruptedJsonDownloadException()
 
         # Load each of the JSON files into memory
         self.json_files = {}
@@ -174,7 +182,12 @@ class Layouts:
         layout_chain = []
 
         # Retrieve initial layout file
-        json_data = self.json_files[self.layout_names[name]]
+        try:
+            json_data = self.json_files[self.layout_names[name]]
+        except KeyError:
+            log.error('Could not find layout: %s', name)
+            log.error('Layouts path: %s', self.layout_path)
+            raise
         layout_chain.append(Layout(name, json_data))
 
         # Recursively locate parent layout files
@@ -266,6 +279,13 @@ class Layouts:
             self.dict_merge(layout.json(), mlayout.json())
 
         return layout
+
+
+class CorruptedJsonDownloadException(Exception):
+    '''
+    Thrown when no json files are found at the given layouts path
+    '''
+    pass
 
 
 class UnknownLayoutPathException(Exception):
