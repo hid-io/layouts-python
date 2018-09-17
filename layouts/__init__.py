@@ -196,7 +196,7 @@ class Layouts:
             # Find the parent
             parent_path = None
             for path in self.json_file_paths:
-                if parent in path:
+                if os.path.normcase(os.path.normpath(parent)) in os.path.normcase(path):
                     parent_path = path
 
             # Make sure a path was found
