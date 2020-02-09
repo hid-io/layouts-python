@@ -28,12 +28,13 @@ import tempfile
 
 import requests
 
+import github
 from github import Github, GithubException
 
 
 ## Variables
 
-__version__ = '0.4.9'
+__version__ = '0.4.10'
 
 log = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ class Layouts:
                     try:
                         self.retrieve_github_cache(github_path, version, cache_dir, token)
                     # Next attempt to use git directly
-                    except GithubException.RateLimitExceededException:
+                    except Exception:
                         self.retrieve_github_cache_gitpython(github_path, version, cache_dir)
 
                 matches = sorted(glob.glob(os.path.join(cache_dir, match)))
@@ -186,7 +187,7 @@ class Layouts:
                 total_commits += 1
             commit_number = total_commits - commit_number
             tar_url = repo.get_archive_link('tarball', commit.sha)
-        except GithubException.RateLimitExceededException:
+        except github.GithubException.RateLimitExceededException:
             if token is None:
                 log.warning("GITHUB_APIKEY is not set!")
             raise
