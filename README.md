@@ -11,7 +11,7 @@ With some additional helpers to deal with string composition.
 pip install layouts
 ```
 
-[![GitHub Action Status](https://github.com/hid-io/layouts-python/workflows/Python%20Package/badge.svg)](https://github.com/hid-io/layouts-python/actions)
+[![GitHub Action Status](https://github.com/hid-io/layouts-python/workflows/Python%20package/badge.svg)](https://github.com/hid-io/layouts-python/actions)
 
 [![Visit our IRC channel](https://kiwiirc.com/buttons/irc.freenode.net/hid-io.png)](https://kiwiirc.com/client/irc.freenode.net/#hid-io)
 
