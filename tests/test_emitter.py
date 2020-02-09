@@ -6,7 +6,6 @@ Test various emitter configurations
 
 import layouts
 import layouts.emitter
-import pytest
 
 from tests.layoutstest import layout_mgr
 

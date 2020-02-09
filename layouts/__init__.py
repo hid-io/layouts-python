@@ -33,7 +33,7 @@ from github import Github, GithubException
 
 ## Variables
 
-__version__ = '0.4.7'
+__version__ = '0.4.8'
 
 log = logging.getLogger(__name__)
 
@@ -54,6 +54,7 @@ class Layouts:
         cache_dir=tempfile.gettempdir(),
         token=None,
         layout_path=None,
+        force_git=False,
     ):
         '''
         @param github_path: Location of the git repo on GitHub (e.g. hid-io/layouts)
@@ -62,6 +63,7 @@ class Layouts:
         @param cache_dir: Directory to operate on external cache from
         @param token: GitHub access token, defaults to None
         @param layout_path: Location to look for layouts (e.g. local copy). Disables GitHub cache when not None.
+        @param force_git: Forces native git client instead of GitHub API (slower, but no API limits)
         '''
         self.layout_path = layout_path
 
@@ -79,7 +81,18 @@ class Layouts:
 
             # No cache, retrieve from GitHub
             if not matches:
-                self.retrieve_github_cache(github_path, version, cache_dir, token)
+                # Force native git client instead of as a fallback
+                if force_git:
+                    self.retrieve_github_cache_gitpython(github_path, version, cache_dir)
+                # GitHub API
+                else:
+                    # Attempt to use GitHub API first
+                    try:
+                        self.retrieve_github_cache(github_path, version, cache_dir, token)
+                    # Next attempt to use git directly
+                    except GithubException.RateLimitExceededException:
+                        self.retrieve_github_cache_gitpython(github_path, version, cache_dir)
+
                 matches = sorted(glob.glob(os.path.join(cache_dir, match)))
 
             # Select the newest cache
@@ -107,6 +120,45 @@ class Layouts:
         for json_file, json_data in self.json_files.items():
             for name in json_data['name']:
                 self.layout_names[name] = json_file
+
+    def retrieve_github_cache_gitpython(self, github_path, version, cache_dir):
+        '''
+        Retrieves a cache of the layouts git repo from GitHub
+        Does not use the GitHub API, it uses git directly.
+        Should not be as susceptible to API Limit restrictions, but requires git to be installed.
+
+        @param github_path: Location of the git repo on GitHub (e.g. hid-io/layouts)
+        @param version: git reference for the version to download (e.g. master)
+        @param cache_dir: Directory to operate on external cache from
+        '''
+        import git
+
+        url = 'https://github.com/{}'.format(github_path)
+        g = git.cmd.Git()
+
+        # Choose the first reference that matches (there should be only one!)
+        commit = ""
+        for ref in g.ls_remote(url, version).split('\n'):
+            hash_ref_list = ref.split('\t')
+            commit = hash_ref_list[0]
+            break
+
+        # Clone the repo (needed to count the number of commits)
+        temp_repo_path = os.path.join(cache_dir, 'temp_gitrepo')
+        if os.path.exists(temp_repo_path):
+            shutil.rmtree(temp_repo_path)
+        repo = git.Repo.clone_from(url, temp_repo_path)
+        commit_number = 0
+        for c in repo.iter_commits():
+            # If we find the commit number, this is where to start counting from
+            if c == commit:
+                commit_number = 0
+            commit_number += 1
+
+        # Construct download path
+        tar_url = 'https://github.com/hid-io/layouts/archive/{}.tar.gz'.format(commit)
+
+        self.github_tar_download(github_path, cache_dir, commit, commit_number, tar_url, long_commit_sha=True)
 
     def retrieve_github_cache(self, github_path, version, cache_dir, token):
         '''
@@ -139,11 +191,29 @@ class Layouts:
                 log.warning("GITHUB_APIKEY is not set!")
             raise
 
+        self.github_tar_download(github_path, cache_dir, commit.sha, commit_number, tar_url)
+
+    def github_tar_download(self, github_path, cache_dir, commit_sha, commit_number, tar_url, long_commit_sha=False):
+        '''
+        Downloads the specified tar file to the given cache location.
+
+        @param github_path: Location of the git repo on GitHub (e.g. hid-io/layouts)
+        @param version: git reference for the version to download (e.g. master)
+        @param cache_dir: Directory to operate on external cache from
+        @param commit_sha: Git commit sha for the download
+        @param commit_number: Numerical commit of the git repo head
+        @param tar_url: URL to download the tar file from
+        @param long_commit_sha: Used to differentiate between direct and API sourced download/tar_urls
+        '''
         # GitHub only uses the first 7 characters of the sha in the download
-        dirname_orig = "{}-{}".format(github_path.replace('/', '-'), commit.sha[:7])
+        dirname_orig = "{}-{}".format(github_path.replace('/', '-'), commit_sha[:7])
+        dirname_new = dirname_orig
+        if long_commit_sha:
+            dirname_orig = '{}-{}'.format(github_path.split('/')[1], commit_sha)
+
         dirname_orig_path = os.path.join(cache_dir, dirname_orig)
         # Adding a commit number so it's clear which is the latest version without requiring git
-        dirname = "{}-{}".format(commit_number, dirname_orig)
+        dirname = "{}-{}".format(commit_number, dirname_new)
         dirname_path = os.path.join(cache_dir, dirname)
 
         # If directory doesn't exist, check if tarball does

@@ -5,11 +5,10 @@ layouts cache download tests
 ### Imports ###
 
 import os
+import requests
 import tarfile
 
 import layouts
-import pytest
-import requests
 
 from github import Github
 from tests.layoutstest import cache_dir
@@ -71,3 +70,9 @@ def test_github_cache(cache_dir):
     mgr = layouts.Layouts(force_refresh=True, cache_dir=cache_dir)
     assert mgr.list_layouts()
 
+def test_git_cache(cache_dir):
+    '''
+    Test GitHub cache using a git client
+    '''
+    mgr = layouts.Layouts(force_refresh=True, force_git=True, cache_dir=cache_dir)
+    assert mgr.list_layouts()
