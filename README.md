@@ -12,6 +12,7 @@ pip install layouts
 ```
 
 [![GitHub Action Status](https://github.com/hid-io/layouts-python/workflows/Python%20package/badge.svg)](https://github.com/hid-io/layouts-python/actions)
+[![PyPI version](https://badge.fury.io/py/layouts.svg)](https://badge.fury.io/py/layouts)
 
 [![Visit our IRC channel](https://kiwiirc.com/buttons/irc.freenode.net/hid-io.png)](https://kiwiirc.com/client/irc.freenode.net/#hid-io)
 
