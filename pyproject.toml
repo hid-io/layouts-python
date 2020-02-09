@@ -14,7 +14,8 @@ classifiers = ["Intended Audience :: Developers",
 ]
 description-file = "README.md"
 requires = ["requests",
-    "pygithub==1.39",
+    "PyGithub",
+    "GitPython",
 ]
-requires-python = ">=3.4"
+requires-python = ">=3.5"
 
