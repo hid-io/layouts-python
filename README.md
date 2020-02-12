@@ -13,6 +13,8 @@ pip install layouts
 
 [![GitHub Action Status](https://github.com/hid-io/layouts-python/workflows/Python%20package/badge.svg)](https://github.com/hid-io/layouts-python/actions)
 [![PyPI version](https://badge.fury.io/py/layouts.svg)](https://badge.fury.io/py/layouts)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/hid-io/layouts-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/hid-io/layouts-python/alerts/)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/hid-io/layouts-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/hid-io/layouts-python/context:python)
 
 [![Visit our IRC channel](https://kiwiirc.com/buttons/irc.freenode.net/hid-io.png)](https://kiwiirc.com/client/irc.freenode.net/#hid-io)
 
