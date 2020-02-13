@@ -6,8 +6,6 @@ This file is responsible for various utility functions useful to generate differ
 For example, generating list of C defines for use with keyboard firmware.
 '''
 
-from . import Layout
-
 def basic_c_defines(
     layout,
     keyboard_prefix="KEY_",
